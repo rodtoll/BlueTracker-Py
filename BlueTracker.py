@@ -21,13 +21,15 @@ def read_config(file_name):
     device_id = device_id.rstrip('\n')
     # Header specifying station id is next
     config_file.readline()
-    station_name = config_file.readline()
-    station_name = station_name.rstrip('\n')
+    station_id = config_file.readline()
+    station_id = station_id.rstrip('\n')
     # Header before the individual device entries
     config_file.readline()
     # read the entries
     for config_line in config_file:
         config_elements = config_line.split(",")
+        print("key: "+config_elements[0])
+        print("value: "+config_elements[1])
         device_map[config_elements[0]] = config_elements[1]
     config_file.close()
 
