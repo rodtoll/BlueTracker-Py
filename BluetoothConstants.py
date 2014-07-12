@@ -1,0 +1,14 @@
+__author__ = 'rodtoll'
+
+SERVICE_NAME = "org.bluez"
+ADAPTER_INTERFACE = SERVICE_NAME + ".Adapter1"
+DEVICE_INTERFACE = SERVICE_NAME + ".Device1"
+NO_DEVICE_NAME = "<NONE>"
+DEVICE_PROPERTY_NAME = "Name"
+DEVICE_PROPERTY_ADDRESS = "Address"
+DEVICE_PROPERTY_RSSI = "RSSI"
+OBJECT_MANAGER_OBJECT = "org.freedesktop.DBus.ObjectManager"
+PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties"
+SIGNAL_PROPERTY_CHANGED ="PropertiesChanged"
+SIGNAL_INTERFACE_ADDED = "InterfacesAdded"
+SIGNAL_INTERFACE_REMOVED = "InterfacesRemoved"
