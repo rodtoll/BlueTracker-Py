@@ -4,16 +4,17 @@ from BluetoothAdapter import BluetoothAdapter
 import gobject as GObject
 from dbus.mainloop.glib import DBusGMainLoop
 import ISY
+import sys
 
 device_id = "hci0"
 station_id = "station"
 
 device_map = {}
 
-def read_config():
+def read_config(file_name):
     global device_id
     global station_id
-    config_file = open("./devices.cfg", "r")
+    config_file = open(file_name, "r")
     # Header specifying device id is next
     config_file.readline()
     device_id = config_file.readline()
@@ -46,7 +47,12 @@ def handle_device_update(device):
 if __name__ == "__main__":
     DBusGMainLoop(set_as_default=True)
 
-    read_config()
+    if len(sys.argv) > 1:
+        config_file_name = sys.argv[1]
+    else:
+        config_file_name = "./devices.macbook.cfg"
+
+    read_config(config_file_name)
 
     adapter = BluetoothAdapter(device_id, handle_device_update)
     adapter.start_discovery()
