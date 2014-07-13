@@ -4,32 +4,36 @@ import BluetoothConstants
 from datetime import datetime
 
 class BluetoothDevice:
-    def __init__(self, path, properties, device_callback=None):
+    def __init__(self, path, properties, device_present_callback=None, device_property_callback=None):
         self._is_present = False
         self._path = path
         self._name = ""
         self._rssi = 0
         self._address = None
-        self._update_callback = device_callback
-        self.update_properties(properties)
+        self._device_present_callback = device_present_callback
+        self._device_property_callback = device_property_callback
+        self.set_properties(properties)
+        self.set_is_present(True)
 
-    def set_device_callback(self, update_callback):
-        self.update_callback = update_callback
+    def indicate_device_present_changed(self):
+        if self._device_present_callback is not None:
+            self._device_present_callback(self)
 
-    def indicate_device_changed(self, device):
-        if self.update_callback is not None:
-            self.update_callback(device)
+    def indicate_device_property_changed(self):
+        if self._device_property_callback is not None:
+            self._device_property_callback(self)
+
+    def set_properties(self,properties):
+        if BluetoothConstants.BLUEZ_DEVICE_PROPERTY_NAME in properties:
+            self.name = properties[BluetoothConstants.BLUEZ_DEVICE_PROPERTY_NAME]
+        if BluetoothConstants.BLUEZ_DEVICE_PROPERTY_ADDRESS in properties:
+            self.address = properties[BluetoothConstants.BLUEZ_DEVICE_PROPERTY_ADDRESS]
+        if BluetoothConstants.BLUEZ_DEVICE_PROPERTY_RSSI in properties:
+            self.rssi = properties[BluetoothConstants.BLUEZ_DEVICE_PROPERTY_RSSI]
 
     def update_properties(self,properties):
-        if BluetoothConstants.DEVICE_PROPERTY_NAME in properties:
-            self.name = properties[BluetoothConstants.DEVICE_PROPERTY_NAME]
-        self._is_present = True
-        if BluetoothConstants.DEVICE_PROPERTY_ADDRESS in properties:
-            self.address = properties[BluetoothConstants.DEVICE_PROPERTY_ADDRESS]
-        if BluetoothConstants.DEVICE_PROPERTY_RSSI in properties:
-            self.rssi = properties[BluetoothConstants.DEVICE_PROPERTY_RSSI]
-        self.last_seen = datetime.now()
-        self.indicate_device_changed(self)
+        self.set_properties(properties)
+        self.indicate_device_property_changed()
 
     def get_is_present(self):
         return self._is_present
@@ -37,9 +41,10 @@ class BluetoothDevice:
     def set_is_present(self,new_is_present):
         if self._is_present != new_is_present:
             self._is_present = new_is_present
-            self.indicate_device_changed(self)
+            self.indicate_device_present_changed()
+        if self._is_present:
+            self.last_seen = datetime.now()
 
-    is_present = property(get_is_present,set_is_present)
 
     def get_last_seen(self):
         return self._last_seen
