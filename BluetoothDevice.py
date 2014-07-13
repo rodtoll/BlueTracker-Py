@@ -23,7 +23,7 @@ class BluetoothDevice:
     def update_properties(self,properties):
         if BluetoothConstants.DEVICE_PROPERTY_NAME in properties:
             self.name = properties[BluetoothConstants.DEVICE_PROPERTY_NAME]
-        self.is_present = True
+        self._is_present = True
         if BluetoothConstants.DEVICE_PROPERTY_ADDRESS in properties:
             self.address = properties[BluetoothConstants.DEVICE_PROPERTY_ADDRESS]
         if BluetoothConstants.DEVICE_PROPERTY_RSSI in properties:
@@ -34,9 +34,10 @@ class BluetoothDevice:
     def get_is_present(self):
         return self._is_present
 
-    def set_is_present(self,is_present):
-        self._is_present = is_present
-        self.indicate_device_changed(self)
+    def set_is_present(self,new_is_present):
+        if self._is_present != new_is_present:
+            self._is_present = new_is_present
+            self.indicate_device_changed(self)
 
     is_present = property(get_is_present,set_is_present)
 

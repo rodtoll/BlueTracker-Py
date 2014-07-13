@@ -41,7 +41,7 @@ class BluetoothAdapter:
 
     def device_removed(self, path, interfaces):
         if path in self.devices:
-            self.devices[path].is_present = False
+            self.devices[path].set_is_present(False)
 
     def device_changed(self,interface, changed, invalidated, path):
         self.device_update_and_create(path, changed)
