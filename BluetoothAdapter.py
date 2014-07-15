@@ -36,6 +36,15 @@ class BluetoothAdapter:
             device = BluetoothDevice(address, properties, self.device_callback, self.device_property_changed_callback)
             self.devices[address] = device
 
+    def power_on(self):
+        current_state = self.adapter.GetProperties()
+
+        # Boot adapter if needed
+        if BluetoothConstants.BLUEZ_DEVICE_PROPERTY_POWERED in current_state:
+            if current_state[BluetoothConstants.BLUEZ_DEVICE_PROPERTY_POWERED] == 0:
+                self.adapter.SetProperty(BluetoothConstants.BLUEZ_DEVICE_PROPERTY_POWERED,dbus.Boolean(1))
+
+
     def property_changed(self, property, value):
         if property == "Discovering":
             if self.discovering:

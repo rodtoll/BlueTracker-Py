@@ -3,6 +3,7 @@ __author__ = 'rodtoll'
 import dbus
 import BluetoothConstants
 from BluetoothAdapter import BluetoothAdapter
+import logging
 
 class BluetoothFactory:
     def __init__(self):
