@@ -77,6 +77,9 @@ class BlueTrackerDaemon():
 
         adapter = factory.get_adapter(self.device_id)
 
+        if adapter is None:
+            raise Exception("Unable to find specified adapter. Fatal error. Adapter- "+self.device_id)
+
         logger.error("Got adapter "+self.device_id)
 
         adapter.power_on()
@@ -103,13 +106,17 @@ app = BlueTrackerDaemon(config_file_name)
 logger = logging.getLogger("DaemonLog")
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler = logging.FileHandler("/home/rodtoll/PycharmProjects/BlueTracker-Py/bluetracker.log")
+handler = logging.FileHandler("./bluetracker.log")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-if len(sys.argv) > 1 and sys.argv[1] == 'local':
-    app.run()
-else:
-    daemon_runner = runner.DaemonRunner(app)
-    daemon_runner.daemon_context.files_preserve=[handler.stream]
-    daemon_runner.do_action()
+try:
+    if len(sys.argv) > 1 and sys.argv[1] == 'local':
+        app.run()
+    else:
+        daemon_runner = runner.DaemonRunner(app)
+        daemon_runner.daemon_context.files_preserve=[handler.stream]
+        daemon_runner.do_action()
+except:
+    logger.exception("Exception running daemon - ")
+    sys.exit(1)
