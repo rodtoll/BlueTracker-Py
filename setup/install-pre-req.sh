@@ -15,7 +15,7 @@ tar xvf bluez-4.101.tar
 echo "Copying updated mgmtops.c"
 cp -f ./BlueTracker-Py/setup/mgmtops.c ./bluez-4.101/plugins
 echo "Getting latest projects..."
-git clone https://github.com/rodtoll/BlueTracker-Py.git
+# git clone https://github.com/rodtoll/BlueTracker-Py.git
 git clone https://github.com/evilpete/ISYlib-python.git
 cd ISYlib-python
 python ./setup.py install
