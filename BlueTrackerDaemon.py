@@ -20,6 +20,7 @@ class BlueTrackerDaemon():
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/null'
         self.stderr_path = '/dev/null'
+        self.heartbeat_variable_id = None
         self.read_config_file()
         self.init_logger()
         self.dump_config()
@@ -67,6 +68,10 @@ class BlueTrackerDaemon():
         config_file.readline()
         self.isy_password = config_file.readline()
         self.isy_password = self.isy_password.rstrip('\n')
+        # Header specifying heartbeat variable name
+        config_file.readline()
+        self.heartbeat_variable_id = config_file.readline()
+        self.heartbeat_variable_id = self.heartbeat_variable_id.rstrip('\n')
         # Header before the individual device entries
         config_file.readline()
         # read the entries
@@ -84,6 +89,7 @@ class BlueTrackerDaemon():
         self.logger.error("ISY Address: "+self.isy_address)
         self.logger.error("ISY User: "+self.isy_user)
         self.logger.error("ISY Password: "+self.isy_password)
+        self.logger.error("Heartbeat: "+self.heartbeat_variable_id)
 
         for address in self.device_map:
             self.logger.error("Device: "+address+" ISY Variable ID: "+self.device_map[address])
@@ -109,6 +115,11 @@ class BlueTrackerDaemon():
         daemon_runner.daemon_context.files_preserve=[self.handler.stream]
         daemon_runner.do_action()
 
+    def send_heartbeat(self):
+        self.logger.error("### Heartbeat sent")
+        self.isy.var_set_value(self.heartbeat_variable_id, 10)
+        return True
+
     def run(self):
 
         DBusGMainLoop(set_as_default=True)
@@ -133,9 +144,13 @@ class BlueTrackerDaemon():
         self.logger.error("Set device callbacks")
         adapter.start_discovery()
         self.logger.error("discovery started")
+        self.send_heartbeat()
+        self.logger.error("initial heartbeat sent")
 
+        event_id = GObject.timeout_add(240000,self.send_heartbeat)
         mainloop = GObject.MainLoop()
         mainloop.run()
+        GObject.source_remove(event_id)
 
         adapter.stop_discovery()
 
