@@ -4,7 +4,7 @@ apt-get update
 echo "Copying over interfaces file"
 cp -f /home/pi/BlueTracker-Py/setup/interfaces /etc/network/interfaces
 echo "Get the required libraries to build bluez"
-apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev python-dbus python-setuptools python-daemon python-gobject
+apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev python-dbus python-setuptools python-daemon python-gobject python-requests
 echo "Getting bluez"
 wget http://www.kernel.org/pub/linux/bluetooth/bluez-4.101.tar.xz
 echo "Extracting bluez"

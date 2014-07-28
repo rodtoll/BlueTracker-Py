@@ -8,6 +8,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 import sys
 from BluetoothFactory import BluetoothFactory
 import ISY
+import requests
 import BluetoothConstants
 
 class BlueTrackerDaemon():
@@ -21,6 +22,8 @@ class BlueTrackerDaemon():
         self.stdout_path = '/dev/null'
         self.stderr_path = '/dev/null'
         self.heartbeat_variable_id = None
+        self.master_address = "http://10.0.1.43:8080"
+        self.master_password = " "
         self.read_config_file()
         self.init_logger()
         self.dump_config()
@@ -72,6 +75,14 @@ class BlueTrackerDaemon():
         config_file.readline()
         self.heartbeat_variable_id = config_file.readline()
         self.heartbeat_variable_id = self.heartbeat_variable_id.rstrip('\n')
+        # Header specifying master address
+        config_file.readline()
+        self.master_address = config_file.readline()
+        self.master_address = self.master_address.rstrip('\n')
+        # Header specifying master password
+        config_file.readline()
+        self.master_password = config_file.readline()
+        self.master_password = self.master_password.rstrip('\n')
         # Header before the individual device entries
         config_file.readline()
         # read the entries
@@ -90,6 +101,8 @@ class BlueTrackerDaemon():
         self.logger.error("ISY User: "+self.isy_user)
         self.logger.error("ISY Password: "+self.isy_password)
         self.logger.error("Heartbeat: "+self.heartbeat_variable_id)
+        self.logger.error("Master Address: "+self.master_address)
+        self.logger.error("Master Password: "+self.master_password)
 
         for address in self.device_map:
             self.logger.error("Device: "+address+" ISY Variable ID: "+self.device_map[address])
@@ -105,10 +118,11 @@ class BlueTrackerDaemon():
                 else:
                     self.isy.var_set_value(variable_id, 0)
         self.logger.error(self.station_id+"-[DEVP] Name: ["+device.name+"] Device Update: ["+device.address+"] Present: ["+str(device.get_is_present())+"] RSSI: ["+str(device.rssi)+"] "+action)
-
+        self.send_reading_to_master(device.address, device.rssi)
 
     def handle_device_property_changed(self,device):
         self.logger.error(self.station_id+"-[PROP] Name: ["+device.name+"] Device Update: ["+device.address+"] Present: ["+str(device.get_is_present())+"] RSSI: ["+str(device.rssi)+"]")
+        self.send_reading_to_master(device.address, device.rssi)
 
     def run_daemon(self):
         daemon_runner = runner.DaemonRunner(self)
@@ -118,7 +132,27 @@ class BlueTrackerDaemon():
     def send_heartbeat(self):
         self.logger.error("### Heartbeat sent")
         self.isy.var_set_value(self.heartbeat_variable_id, 10)
+        self.send_heartbeat_to_master()
         return True
+
+    def send_reading_to_master(self, address, signal_strength):
+        request_headers = {'x-troublex3-bluetracker-auth' : self.master_password}
+        request_params = { 'address' : address, 'signalStrength' : str(signal_strength) }
+
+        request_uri = self.master_address + '/_ah/api/readings/v1/node/' + self.station_id + '/readings'
+
+        try:
+            requests.post(request_uri, params = request_params, headers = request_headers)
+        except:
+            self.logger.error("Failed loading specified URI for update")
+
+
+    def send_heartbeat_to_master(self):
+        request_headers = {'content-length': 0, 'x-troublex3-bluetracker-auth' : self.master_password}
+        try:
+            requests.put(self.master_address + '/_ah/api/node/v1/node/' + self.station_id, headers = request_headers)
+        except:
+            self.logger.error("Failed loading specified URI for heartbeat")
 
     def run(self):
 
@@ -154,6 +188,10 @@ class BlueTrackerDaemon():
 
         adapter.stop_discovery()
 
+    def dump_status(self):
+        print("Status of BlueTracker on ISY:")
+
+
 if len(sys.argv) > 2:
     config_file_name = sys.argv[2]
 else:
@@ -163,6 +201,8 @@ app = BlueTrackerDaemon(config_file_name)
 try:
     if len(sys.argv) > 1 and sys.argv[1] == 'local':
         app.run()
+    elif len(sys.argv) > 1 and sys.argv[1] == "status":
+        app.dump_status()
     else:
         app.run_daemon()
 
