@@ -136,7 +136,7 @@ class BlueTrackerDaemon():
         return True
 
     def send_reading_to_master(self, address, signal_strength):
-        request_headers = {'x-troublex3-bluetracker-auth' : self.master_password}
+        request_headers = {'content-length' : '0', 'x-troublex3-bluetracker-auth' : self.master_password}
         request_params = { 'address' : address, 'signalStrength' : str(signal_strength) }
 
         request_uri = self.master_address + '/_ah/api/readings/v1/node/' + self.station_id + '/readings'
@@ -148,7 +148,7 @@ class BlueTrackerDaemon():
 
 
     def send_heartbeat_to_master(self):
-        request_headers = {'content-length': 0, 'x-troublex3-bluetracker-auth' : self.master_password}
+        request_headers = {'content-length': '0', 'x-troublex3-bluetracker-auth' : self.master_password}
         try:
             requests.put(self.master_address + '/_ah/api/node/v1/node/' + self.station_id, headers = request_headers)
         except:
