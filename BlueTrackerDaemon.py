@@ -98,7 +98,7 @@ class BlueTrackerDaemon():
         DBusGMainLoop(set_as_default=True)
 
         if self.config.garage_pin_number != '':
-            import GarageDoorDBusService
+            from GarageDoorDBusService import GarageDoorDBusService
             self.garage_service = GarageDoorDBusService(self.config.garage_pin_number)
 
         factory = BluetoothFactory()

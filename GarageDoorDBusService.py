@@ -12,5 +12,5 @@ class GarageDoorDbusService(dbus.service.Object):
 
     @dbus.service.method('org.troublex3.garagedoorservice')
     def toggler_door(self):
-        press_garage_door_button(self.pin_number)
+        GarageDoor.press_garage_door_button(int(self.pin_number))
         return "Press sent"
