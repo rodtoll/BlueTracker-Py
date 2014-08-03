@@ -4,7 +4,7 @@ import dbus
 import dbus.service
 import GarageDoor
 
-class GarageDoorDbusService(dbus.service.Object):
+class GarageDoorDBusService(dbus.service.Object):
     def __init__(self,pin_number):
         self.pin_number = pin_number
         bus_name = dbus.service.BusName('org.troublex3.garagedoorservice', bus=dbus.SystemBus())
