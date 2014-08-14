@@ -12,6 +12,7 @@ import requests
 import platform
 import BluetoothConstants
 from BlueTrackerConfig import BlueTrackerConfig
+from PingTracker import PingTracker
 
 class BlueTrackerDaemon():
 
@@ -84,7 +85,6 @@ class BlueTrackerDaemon():
         except:
             self.logger.error("Failed loading specified URI for update")
 
-
     def send_heartbeat_to_master(self):
         request_headers = {'content-length': '0', 'x-troublex3-bluetracker-auth' : self.config.master_password}
         try:
@@ -92,6 +92,12 @@ class BlueTrackerDaemon():
         except:
             self.logger.error("Failed loading specified URI for heartbeat")
             self.logger.error(self.config.master_server + '/_ah/api/node/v1/node/' + self.config.station_id )
+
+    def start_ping_tracker(self):
+        if len(self.config.ping_map) > 0:
+            self.logger.error("Starting ping tracker...")
+            self.ping_tracker = PingTracker(self.config.ping_sleep_period, self.config.ping_timeout,self.config.ping_retries,self.config.ping_retry_pause, self.logger, self.send_reading_to_master, self.config.ping_map)
+            self.ping_tracker.start()
 
     def run(self):
 
@@ -118,11 +124,14 @@ class BlueTrackerDaemon():
 
         adapter.set_device_callbacks(self.handle_device_update,self.handle_device_property_changed)
 
+        self.start_ping_tracker()
+
         self.logger.error("Set device callbacks")
         adapter.start_discovery()
         self.logger.error("discovery started")
         self.send_heartbeat()
         self.logger.error("initial heartbeat sent")
+
 
         event_id = GObject.timeout_add(240000,self.send_heartbeat)
         mainloop = GObject.MainLoop()
