@@ -8,7 +8,8 @@ class BlueTrackerConfig():
         self.ping_map = []
         self.fields = ['isy_address', 'isy_password', 'isy_heartbeat', 'device_id', 'station_id', 'pid_file',
                        'log_file', 'master_server', 'isy_username', 'master_password', 'garage_pin_number',
-                       'ping_sleep_period', 'ping_timeout', "ping_retries", "ping_retry_pause"]
+                       'ping_sleep_period', 'ping_timeout', 'ping_retries', 'ping_retry_pause',
+                       'rht_base_address', 'rht_sleep']
 
     def dump_config(self, logger_source):
         logger_source.error('CONFIG DUMP:')

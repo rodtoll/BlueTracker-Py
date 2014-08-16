@@ -23,7 +23,7 @@ class PingTracker(threading.Thread):
             for device in self.devices:
                 for x in range(0,self.retries-1):
                     delay = ping.do_one(device,self.ping_timeout)
-                    self.logger.error(str(delay))
+                    self.logger.error("Device:" + device + " - " + str(delay))
                     if delay != None:
                         self.report_func(device, delay)
                         # we are only retrying if not found

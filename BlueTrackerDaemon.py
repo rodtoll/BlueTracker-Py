@@ -13,6 +13,7 @@ import platform
 import BluetoothConstants
 from BlueTrackerConfig import BlueTrackerConfig
 from PingTracker import PingTracker
+from RHTDataCollector import RHTDataCollector
 
 class BlueTrackerDaemon():
 
@@ -83,7 +84,7 @@ class BlueTrackerDaemon():
         try:
             requests.post(request_uri, params = request_params, headers = request_headers)
         except:
-            self.logger.error("Failed loading specified URI for update")
+            self.logger.error("Failed loading specified URI for update - "+request_uri+" address: "+self.params['address']+" reading: "+self.params['signalStrength'])
 
     def send_heartbeat_to_master(self):
         request_headers = {'content-length': '0', 'x-troublex3-bluetracker-auth' : self.config.master_password}
@@ -98,6 +99,12 @@ class BlueTrackerDaemon():
             self.logger.error("Starting ping tracker...")
             self.ping_tracker = PingTracker(self.config.ping_sleep_period, self.config.ping_timeout,self.config.ping_retries,self.config.ping_retry_pause, self.logger, self.send_reading_to_master, self.config.ping_map)
             self.ping_tracker.start()
+
+    def start_temp_reader(self):
+        if hasattr(self.config,'rht_base_address'):
+            self.logger.error("Starting RHT reader...")
+            self.rht_reader = RHTDataCollector(self.config.rht_base_address,self.logger, self.send_reading_to_master, self.config.rht_sleep)
+            self.rht_reader.start() 
 
     def run(self):
 
@@ -125,6 +132,7 @@ class BlueTrackerDaemon():
         adapter.set_device_callbacks(self.handle_device_update,self.handle_device_property_changed)
 
         self.start_ping_tracker()
+        self.start_temp_reader()
 
         self.logger.error("Set device callbacks")
         adapter.start_discovery()
