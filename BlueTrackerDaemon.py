@@ -14,6 +14,7 @@ import BluetoothConstants
 from BlueTrackerConfig import BlueTrackerConfig
 from PingTracker import PingTracker
 from RHTDataCollector import RHTDataCollector
+import urllib;
 
 class BlueTrackerDaemon():
 
@@ -77,22 +78,25 @@ class BlueTrackerDaemon():
 
     def send_reading_to_master(self, address, signal_strength):
         request_headers = {'content-length' : '0', 'x-troublex3-bluetracker-auth' : self.config.master_password}
-        request_params = { 'address' : address, 'signalStrength' : str(signal_strength) }
+        request_params = { 'readingValue' : str(signal_strength), 'node': self.config.station_id }
+        address = urllib.quote(address)
 
-        request_uri = self.config.master_server + '/_ah/api/readings/v1/node/' + self.config.station_id + '/readings'
+        request_uri = self.config.master_server + '/_ah/api/tracker/v1/device/' + address + '/reading'
 
         try:
             requests.post(request_uri, params = request_params, headers = request_headers)
         except:
-            self.logger.error("Failed loading specified URI for update - "+request_uri+" address: "+self.params['address']+" reading: "+self.params['signalStrength'])
+            self.logger.error("Failed loading specified URI for update")
+            self.logger.error(self.config.master_server + '/_ah/api/tracker/v1/node/' + address + '/reading' )
+            self.logger.error(request_params)
 
     def send_heartbeat_to_master(self):
         request_headers = {'content-length': '0', 'x-troublex3-bluetracker-auth' : self.config.master_password}
         try:
-            requests.put(self.config.master_server + '/_ah/api/node/v1/node/' + self.config.station_id, headers = request_headers)
+            requests.put(self.config.master_server + '/_ah/api/tracker/v1/node/' + self.config.station_id, headers = request_headers)
         except:
             self.logger.error("Failed loading specified URI for heartbeat")
-            self.logger.error(self.config.master_server + '/_ah/api/node/v1/node/' + self.config.station_id )
+            self.logger.error(self.config.master_server + '/_ah/api/tracker/v1/node/' + self.config.station_id )
 
     def start_ping_tracker(self):
         if len(self.config.ping_map) > 0:
