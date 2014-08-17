@@ -5,7 +5,7 @@ echo "Updating to latest firmware"
 rpi-update
 echo "Copying over remote public key"
 mkdir /home/pi/.ssh
-cp -f /home/pi/BlueTracker-Py/setup/rod.pub /home/pi/.ssh/authorized_key
+cp -f /home/pi/BlueTracker-Py/setup/rod.pub /home/pi/.ssh/authorized_keys
 echo "Copying over interfaces file"
 cp -f /home/pi/BlueTracker-Py/setup/interfaces /etc/network/interfaces
 echo "Get the required libraries to build bluez"
