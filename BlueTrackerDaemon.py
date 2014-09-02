@@ -7,57 +7,51 @@ import gobject as GObject
 from dbus.mainloop.glib import DBusGMainLoop
 import sys
 from BluetoothFactory import BluetoothFactory
-import ISY
 import requests
 import platform
 import BluetoothConstants
 from BlueTrackerConfig import BlueTrackerConfig
-from PingTracker import PingTracker
+from PingTracker import PingTrackerManager
 from RHTDataCollector import RHTDataCollector
-import urllib;
+import urllib
+import os
 
 class BlueTrackerDaemon():
 
     def __init__(self, config_file_name):
+        self.config_file_name = config_file_name
+        self.init_paths()
+        self.init_logger()
+        self.read_config_file()
+        self.dump_config()
+        self.pidfile_timeout = 5
+
+    def init_paths(self):
+        self.pidfile_path = os.getcwd()+"/bluetracker.pid"
+        self.logfile_path = os.getcwd()+"/bluetracker.log"
         self.stdin_path = '/dev/null'
         self.stdout_path = '/dev/null'
         self.stderr_path = '/dev/null'
-        self.config = None
-        self.config_file_name = config_file_name
-        self.read_config_file()
-        self.pidfile_path = self.config.pid_file
-        self.init_logger()
-        self.dump_config()
-
-        self.pidfile_timeout = 5
-        self.isy = ISY.Isy(addr=self.config.isy_address, userl=self.config.isy_username, userp=self.config.isy_password)
 
     def init_logger(self):
         self.logger = logging.getLogger("DaemonLog")
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        self.handler = logging.FileHandler(self.config.log_file)
+        self.handler = logging.FileHandler(self.logfile_path)
         self.handler.setFormatter(formatter)
         self.logger.addHandler(self.handler)
-
 
     def read_config_file(self):
         self.config = BlueTrackerConfig()
         self.config.load(self.config_file_name)
+        self.config.load_node_from_master(self.logger)
+        self.config.load_devices_from_master(self.logger)
 
     def dump_config(self):
         self.config.dump_config(self.logger)
 
     def handle_device_update(self,device):
         action = "=> No change"
-        if device.address is not None:
-            if device.address in self.config.device_map:
-                variable_id = self.config.device_map[device.address]
-                action = "=> Updated :"+variable_id
-                if device.get_is_present():
-                    self.isy.var_set_value(variable_id, 1)
-                else:
-                    self.isy.var_set_value(variable_id, 0)
         self.logger.error(self.config.station_id+"-[DEVP] Name: ["+device.name+"] Device Update: ["+device.address+"] Present: ["+str(device.get_is_present())+"] RSSI: ["+str(device.rssi)+"] "+action)
         self.send_reading_to_master(device.address, device.rssi)
 
@@ -72,7 +66,6 @@ class BlueTrackerDaemon():
 
     def send_heartbeat(self):
         self.logger.error("### Heartbeat sent")
-        self.isy.var_set_value(self.config.isy_heartbeat, 10)
         self.send_heartbeat_to_master()
         return True
 
@@ -101,8 +94,7 @@ class BlueTrackerDaemon():
     def start_ping_tracker(self):
         if len(self.config.ping_map) > 0:
             self.logger.error("Starting ping tracker...")
-            self.ping_tracker = PingTracker(self.config.ping_sleep_period, self.config.ping_timeout,self.config.ping_retries,self.config.ping_retry_pause, self.logger, self.send_reading_to_master, self.config.ping_map)
-            self.ping_tracker.start()
+            self.ping_tracker = PingTrackerManager(self.config.ping_sleep_period, self.config.ping_timeout,self.config.ping_retries,self.config.ping_retry_pause, self.logger, self.send_reading_to_master, self.config.ping_map)
 
     def start_temp_reader(self):
         if hasattr(self.config,'rht_base_address'):
@@ -114,7 +106,7 @@ class BlueTrackerDaemon():
 
         DBusGMainLoop(set_as_default=True)
 
-        if self.config.garage_pin_number != '':
+        if hasattr(self.config, "garage_pin_number"):
             from GarageDoorDBusService import GarageDoorDBusService
             self.garage_service = GarageDoorDBusService(self.config.garage_pin_number)
 
