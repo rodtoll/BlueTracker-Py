@@ -92,7 +92,7 @@ class BlueTrackerDaemon():
             self.logger.error(self.config.master_server + '/_ah/api/tracker/v1/node/' + self.config.station_id )
 
     def start_ping_tracker(self):
-        if len(self.config.ping_map) > 0:
+        if hasattr(self.config,"ping_sleep_period"):
             self.logger.error("Starting ping tracker...")
             self.ping_tracker = PingTrackerManager(self.config.ping_sleep_period, self.config.ping_timeout,self.config.ping_retries,self.config.ping_retry_pause, self.logger, self.send_reading_to_master, self.config.ping_map)
 

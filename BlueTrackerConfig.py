@@ -41,7 +41,7 @@ class BlueTrackerConfig():
         try:
             logger_source.error("Loading from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json()
+            server_config_data = result.json
             self.station_id = server_config_data['nodeId']
             self.nodeType = server_config_data['nodeType']
             self.device_id = server_config_data['deviceId']
@@ -58,9 +58,15 @@ class BlueTrackerConfig():
                 logger_source.error("Loading the RHT service")
                 self.rht_sleep = server_config_data['rhtService']['sleep']
                 self.rht_base_address = server_config_data['rhtService']['baseAddress']
+        except NameError as e:
+            print(e)
+            print(e.strerror)
+        except TypeError as q:
+            print(q)
+            print(q.strerror)
         except:
             print("Error getting config from master. Config: "+request_uri)
-            print(sys.exc_info()[0])
+            print(sys.exc_info()[0].strerror)
 
     def load_devices_from_master(self, logger_source):
         logger_source.error("Loading device list from the master server")
@@ -69,12 +75,15 @@ class BlueTrackerConfig():
         try:
             logger_source.error("Loading device from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json()
+            server_config_data = result.json
             device_list = server_config_data['items']
             for device in device_list:
                 if device['deviceType'] == 'Ping':
                     logger_source.error("Adding device: "+device['address'])
                     self.ping_map.append(device['address'])
+        except TypeError as q:
+            print(q)
+            print(q.strerror)
         except:
             print("Error getting config from master. Config: "+request_uri)
             print(sys.exc_info()[0])

@@ -2,6 +2,7 @@ import subprocess
 import threading
 import time
 import logging
+import os
 
 class RHTDataCollector(threading.Thread):
     def __init__(self, base_address, logger, report_func, sleep_period):
@@ -14,7 +15,8 @@ class RHTDataCollector(threading.Thread):
 
     def run(self):
         while True:
-            result = subprocess.check_output("./rht03")
+            path_to_run = os.getcwd()+"/rht03"
+            result = subprocess.check_output(path_to_run)
             result = result.rstrip('\n')
             results = result.split(',')
             self.logger.error("RHT Read: Temp: "+str(results[0])+" Humidity: "+str(results[1]))
