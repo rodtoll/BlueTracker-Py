@@ -31,7 +31,10 @@ class BlueTrackerConfig():
 
     def load_node_from_master(self, logger_source):
         logger_source.error("Loading config from the master server")
-        local_address = netifaces.ifaddresses('eth0')[2][0].get('addr')
+        if 'wlan0' in netifaces.interfaces():
+            local_address = netifaces.ifaddresses('wlan0')[2][0].get('addr')
+        else:
+            local_address = netifaces.ifaddresses('eth0')[2][0].get('addr')
         logger_source.error("Local address is: "+local_address)
         request_headers = {'content-length' : '0', 'x-troublex3-bluetracker-auth' : self.master_password }
         request_uri = self.master_server + '/_ah/api/tracker/v1/node/' + local_address

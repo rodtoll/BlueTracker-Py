@@ -9,12 +9,14 @@ cp -f /home/pi/BlueTracker-Py/setup/rod.pub /home/pi/.ssh/authorized_keys
 echo "Copying over interfaces file"
 cp -f /home/pi/BlueTracker-Py/setup/interfaces /etc/network/interfaces
 echo "Get the required libraries to build bluez"
-apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev python-dbus python-setuptools python-daemon python-gobject python-requests
+apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev python-dbus python-setuptools python-daemon python-gobject python-requests python-dev python-pip
 echo "Getting bluez"
 wget http://www.kernel.org/pub/linux/bluetooth/bluez-4.101.tar.xz
 echo "Extracting bluez"
 unxz bluez-4.101.tar.xz
 tar xvf bluez-4.101.tar
+echo "Getting netifaces"
+sudo pip install netifaces
 echo "Copying updated mgmtops.c"
 cp -f /home/pi/BlueTracker-Py/setup/mgmtops.c /home/pi/bluez-4.101/plugins
 echo "Getting latest projects..."
