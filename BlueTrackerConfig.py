@@ -1,8 +1,8 @@
 __author__ = 'rodtoll'
 
 import json
-import netifaces
 import requests
+import netifaces
 import sys
 
 class BlueTrackerConfig():
@@ -35,13 +35,14 @@ class BlueTrackerConfig():
             local_address = netifaces.ifaddresses('wlan0')[2][0].get('addr')
         else:
             local_address = netifaces.ifaddresses('eth0')[2][0].get('addr')
+        local_address = "10.0.1.175"
         logger_source.error("Local address is: "+local_address)
         request_headers = {'content-length' : '0', 'x-troublex3-bluetracker-auth' : self.master_password }
         request_uri = self.master_server + '/_ah/api/tracker/v1/node/' + local_address
         try:
             logger_source.error("Loading from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json
+            server_config_data = result.json()
             self.station_id = server_config_data['nodeId']
             self.nodeType = server_config_data['nodeType']
             self.device_id = server_config_data['deviceId']
@@ -75,7 +76,7 @@ class BlueTrackerConfig():
         try:
             logger_source.error("Loading device from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json
+            server_config_data = result.json()
             device_list = server_config_data['items']
             for device in device_list:
                 if device['deviceType'] == 'Ping':
