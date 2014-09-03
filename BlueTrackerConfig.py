@@ -35,7 +35,6 @@ class BlueTrackerConfig():
             local_address = netifaces.ifaddresses('wlan0')[2][0].get('addr')
         else:
             local_address = netifaces.ifaddresses('eth0')[2][0].get('addr')
-        local_address = "10.0.1.175"
         logger_source.error("Local address is: "+local_address)
         request_headers = {'content-length' : '0', 'x-troublex3-bluetracker-auth' : self.master_password }
         request_uri = self.master_server + '/_ah/api/tracker/v1/node/' + local_address
