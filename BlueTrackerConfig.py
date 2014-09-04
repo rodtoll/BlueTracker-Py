@@ -41,7 +41,7 @@ class BlueTrackerConfig():
         try:
             logger_source.error("Loading from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json
+            server_config_data = result.json()
             self.station_id = server_config_data['nodeId']
             self.nodeType = server_config_data['nodeType']
             self.device_id = server_config_data['deviceId']
@@ -75,7 +75,7 @@ class BlueTrackerConfig():
         try:
             logger_source.error("Loading device from master server via: "+request_uri)
             result = requests.get(request_uri, headers = request_headers)
-            server_config_data = result.json
+            server_config_data = result.json()
             device_list = server_config_data['items']
             for device in device_list:
                 if device['deviceType'] == 'Ping':
