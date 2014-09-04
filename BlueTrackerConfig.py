@@ -1,8 +1,8 @@
 __author__ = 'rodtoll'
 
 import json
-import netifaces
 import requests
+import netifaces
 import sys
 
 class BlueTrackerConfig():
